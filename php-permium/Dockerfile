@@ -1,5 +1,6 @@
-ARG VERSION=8.0
-FROM php:${VERSION}-fpm-alpine
+ARG PHP_TAG=8.0-fpm-alpine
+FROM php:${PHP_TAG}
+
 ## 修改为国内仓库(清华镜像站)
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories \
     && apk upgrade \
@@ -22,17 +23,28 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 ## 删除不需要的包
     && apk del .php-build-deps
 ## 添加一些扩展
-RUN apk add --no-cache --virtual .php-build-deps $PHPIZE_DEPS libtool curl-dev \
+ARG SWOOLE=1 \
+    IMAGIC=1 \
+    COMPOSER=1
+RUN if [ ${SWOOLE} -eq 1 -o ${IMAGIC} -eq 1 ]; then\
+        apk add --no-cache --virtual .php-build-deps $PHPIZE_DEPS libtool curl-dev; \
+    fi; \
 ## 添加 imagick
-    && apk add --no-cache --virtual .imagick-runtime-deps imagemagick libgomp \
-    && apk add --no-cache --virtual .imagick-build-deps imagemagick-dev \
-    && pecl install imagick \
-    && docker-php-ext-enable imagick \
+    if [ ${IMAGIC} -eq 1 ];then \
+        apk add --no-cache --virtual .imagick-runtime-deps imagemagick libgomp \
+        && apk add --no-cache --virtual .imagick-build-deps imagemagick-dev \
+        && pecl install imagick \
+        && docker-php-ext-enable imagick; \
+    fi; \
 ## 添加swoole
-    && pecl install -D 'enable-sockets="no" enable-openssl="yes" enable-http2="yes" enable-mysqlnd="yes" enable-swoole-json="no" enable-swoole-curl="yes" enable-cares="yes"' swoole \
-    && docker-php-ext-enable swoole \
-    && apk del .php-build-deps .imagick-build-deps
+    if [ ${SWOOLE} -eq 1 ]; then \ 
+        pecl install -D 'enable-sockets="no" enable-openssl="yes" enable-http2="yes" enable-mysqlnd="yes" enable-swoole-json="no" enable-swoole-curl="yes" enable-cares="yes"' swoole \
+        && docker-php-ext-enable swoole \
+        && apk del .php-build-deps .imagick-build-deps; \
+    fi; 
 
 ## 安装 composer
-RUN php -r "readfile('https://install.phpcomposer.com/installer');"|php \
-    && mv composer.phar /usr/bin/composer
+RUN if [ ${COMPOSER} -eq 1 ];then \ 
+        php -r "readfile('https://install.phpcomposer.com/installer');"|php \
+        && mv composer.phar /usr/bin/composer; \
+    fi;

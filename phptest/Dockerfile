@@ -1,5 +1,8 @@
-ARG VERSION=8.0
-FROM php:${VERSION}-fpm-alpine
+ARG PHP_TAG=8.0-fpm-alpine
+ARG SWOOLE=TRUE
+ARG IMAGIC=TRUE
+ARG COMPOSER=TRUE
+FROM php:${PHP_TAG}
 ## 修改为国内仓库(清华镜像站)
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories \
     && apk upgrade \
@@ -22,7 +25,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 ## 删除不需要的包
     && apk del .php-build-deps
 ## 添加一些扩展
-RUN apk add --no-cache --virtual .php-build-deps $PHPIZE_DEPS libtool curl-dev
+RUN if [ ${SWOOLE} = TRUE | ${IMAGIC} = TRUE ]; then apk add --no-cache --virtual .php-build-deps $PHPIZE_DEPS libtool curl-dev; fi
 ## 添加 imagick
 RUN apk add --no-cache --virtual .imagick-runtime-deps imagemagick libgomp \
     && apk add --no-cache --virtual .imagick-build-deps imagemagick-dev \
