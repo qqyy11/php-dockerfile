@@ -6,10 +6,10 @@
 
 ### 参数
 
-- `PHP_TAG`  继承的 php 镜像的 tag 默认使用 8.0-fpm-alpine
-- `SWOOLE`   是否安装 swoole 扩展默认 1 ，1：安装；0：不安装 
-- `IMAGIC`   是否安装 imagic 扩展默认 1 ，1：安装；0：不安装 
-- `COMPOSER` 是否安装 composer 默认 1 ，1：安装；0：不安装 
+- `PHP_TAG`  继承的 php 镜像的 tag ，默认使用 8.0-fpm-alpine
+- `SWOOLE`   是否安装 swoole 扩展，默认 1 ，1：安装；0：不安装 
+- `IMAGIC`   是否安装 imagic 扩展，默认 1 ，1：安装；0：不安装 
+- `COMPOSER` 是否安装 composer ，默认 1 ，1：安装；0：不安装 
 
 ### 构建命令示例
     # 命令
